@@ -1,5 +1,7 @@
 package ru.practicum.shareit.user;
 
+import ru.practicum.shareit.user.exception.UserValidateException;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -13,7 +15,7 @@ public interface UserRepository {
 
     boolean existsByEmail(String email);
 
-    User save(User user);
+    User save(User user) throws UserValidateException;
 
     boolean deleteById(Long userId);
 }

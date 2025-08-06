@@ -3,17 +3,17 @@ package ru.practicum.shareit.user;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.user.exception.UserValidateException;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
 public class UserRepositoryInMemory implements UserRepository {
 
-    private final Map<Long, User> users = new HashMap<>();
-    private final Map<String, User> usersByEmail = new HashMap<>();
+    private final Map<Long, User> users = new ConcurrentHashMap<>();
+    private final Map<String, User> usersByEmail = new ConcurrentHashMap<>();
     private final AtomicLong idCounter = new AtomicLong(1);
 
     @Override
@@ -27,24 +27,22 @@ public class UserRepositoryInMemory implements UserRepository {
     }
 
     @Override
-    public User save(User user) {
+    public User save(User user) throws UserValidateException {
         if (user == null) {
             throw new UserValidateException("User cannot be null");
         }
-        synchronized (users) {
-            if (user.getId() == null) {
-                user.setId(idCounter.getAndIncrement());
-            } else {
-                User existingUser = users.get(user.getId());
-                if (existingUser != null && !existingUser.getEmail().equals(user.getEmail())) {
-                    usersByEmail.remove(existingUser.getEmail());
-                }
+        if (user.getId() == null) {
+            user.setId(idCounter.getAndIncrement());
+        } else {
+            User existingUser = users.get(user.getId());
+            if (existingUser != null && !existingUser.getEmail().equals(user.getEmail())) {
+                usersByEmail.remove(existingUser.getEmail());
             }
-            users.put(user.getId(), user);
-            usersByEmail.put(user.getEmail(), user);
-
-            return user;
         }
+        users.put(user.getId(), user);
+        usersByEmail.put(user.getEmail(), user);
+
+        return user;
     }
 
     @Override
@@ -52,14 +50,12 @@ public class UserRepositoryInMemory implements UserRepository {
         if (userId == null) {
             return false;
         }
-        synchronized (users) {
-            User removedUser = users.remove(userId);
-            if (removedUser == null) {
-                return false;
-            }
-            usersByEmail.remove(removedUser.getEmail());
-            return true;
+        User removedUser = users.remove(userId);
+        if (removedUser == null) {
+            return false;
         }
+        usersByEmail.remove(removedUser.getEmail());
+        return true;
     }
 
     @Override

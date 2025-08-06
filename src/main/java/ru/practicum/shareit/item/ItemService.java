@@ -1,13 +1,17 @@
 package ru.practicum.shareit.item;
 
+import ru.practicum.shareit.item.exception.ItemNotFoundException;
+import ru.practicum.shareit.item.exception.ItemValidateException;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
+
 import java.util.List;
 
 public interface ItemService {
-    ItemDto createItem(ItemDto item);
+    ItemDto createItem(ItemDto item) throws UserNotFoundException;
 
-    ItemDto updateItem(ItemDto item);
+    ItemDto updateItem(ItemDto item) throws UserNotFoundException, ItemNotFoundException, ItemValidateException;
 
-    ItemDto getItemById(Long itemId);
+    ItemDto getItemById(Long itemId) throws ItemNotFoundException;
 
     boolean exists(Long itemId);
 

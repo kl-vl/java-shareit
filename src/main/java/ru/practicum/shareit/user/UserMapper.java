@@ -10,20 +10,14 @@ import org.springframework.validation.annotation.Validated;
 
 @Component
 @Mapper(componentModel = "spring")
-// нах мне еще тут валидация в топку отлючаю
-//@Validated // Для интеграции с Spring Validation
 public interface UserMapper {
-
-    // Для создания - используем группу CreateValidation
-    //@Mapping(target = "id", ignore = true)
+    @Mapping(target = "id", ignore = true)
     User toUserFromCreateDto(@Validated(UserDto.Create.class) UserDto dto);
 
-    // Для обновления - используем группу UpdateValidation
-    //@Mapping(target = "id", ignore = true)
+    @Mapping(target = "id", ignore = true)
     User toUserFromUpdateDto(@Validated(UserDto.Update.class) UserDto dto);
 
-    // Для ответа
-    //@Mapping(target = "id", source = "id")
+    @Mapping(target = "id", source = "id")
     UserDto toDto(User user);
 
     @Mapping(target = "id", ignore = true) // ID не обновляем
