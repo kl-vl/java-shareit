@@ -1,12 +1,54 @@
 package ru.practicum.shareit.user;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.user.exception.UserEmailAlreadyExistsException;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
+import ru.practicum.shareit.user.exception.UserValidateException;
 
-/**
- * TODO Sprint add-controllers.
- */
+import java.util.List;
+
 @RestController
 @RequestMapping(path = "/users")
+@RequiredArgsConstructor
+@Validated
 public class UserController {
+    private final UserService userService;
+
+    @GetMapping
+    public List<UserDto> getAllUsers() {
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("/{userId}")
+    public UserDto getUserById(@PathVariable @Min(1) Long userId) throws UserNotFoundException {
+        return userService.getUserById(userId);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserDto createUser(@RequestBody @Validated(UserDto.Create.class) UserDto userDto) throws UserEmailAlreadyExistsException, UserValidateException {
+        return userService.createUser(userDto);
+    }
+
+    @PatchMapping("/{userId}")
+    public UserDto updateUser(
+            @PathVariable @Positive Long userId,
+            @RequestBody @Validated(UserDto.Update.class) UserDto userDto) throws UserNotFoundException, UserEmailAlreadyExistsException, UserValidateException {
+        userDto = userDto.toBuilder().id(userId).build();
+        UserDto updatedUser = userService.updateUser(userDto);
+
+        return updatedUser;
+    }
+
+    @DeleteMapping("/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public boolean deleteUserById(@PathVariable @Min(1) Long userId) {
+        return userService.deleteUserById(userId);
+    }
+
 }
