@@ -148,8 +148,6 @@ public class ItemServiceImpl implements ItemService {
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User id=%d not found".formatted(userId)));
 
-        //TODO
-        //LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);;
         boolean hasBookings = bookingRepository.existsBookingByItemIdAndBookerIdAndStatusIsAndEndBefore(itemId, userId, BookingStatus.APPROVED, LocalDateTime.now());
 
         if (!hasBookings) {
@@ -158,6 +156,9 @@ public class ItemServiceImpl implements ItemService {
 
         Comment comment = commentMapper.toEntity(commentDto);
         comment = commentRepository.save(comment);
+
+        log.info("CreateComment success: commentId={}", comment.getId());
+
         return commentMapper.toDto(comment, bookingMapperDependencies);
     }
 
