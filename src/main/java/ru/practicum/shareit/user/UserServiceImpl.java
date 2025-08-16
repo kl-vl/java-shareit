@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserById(Long userId) throws UserNotFoundException {
         log.info("GetUser input: id={}", userId);
 
-        UserDto userDto = userRepository.getById(userId)
+        UserDto userDto = userRepository.findById(userId)
                 .map(userMapper::toDto)
                 .orElseThrow(() -> new UserNotFoundException("User with id %s not found".formatted(userId)));
 
@@ -59,8 +59,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(UserDto userDto) throws UserEmailAlreadyExistsException, UserNotFoundException, UserValidateException {
-        log.info("UpdateUser input: id={}, email={}", userDto.getId(),  userDto.getEmail());
-        User existingUser = userRepository.getById(userDto.getId())
+        log.info("UpdateUser input: id={}, email={}", userDto.getId(), userDto.getEmail());
+        User existingUser = userRepository.findById(userDto.getId())
                 .orElseThrow(() -> new UserNotFoundException("User with id %s not found".formatted(userDto.getId())));
 
         if (userDto.getEmail() != null &&

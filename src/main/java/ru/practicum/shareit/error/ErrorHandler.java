@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.HandlerMethod;
+import ru.practicum.shareit.booking.exception.BookingAccessDeniedException;
+import ru.practicum.shareit.booking.exception.BookingNotFoundException;
+import ru.practicum.shareit.booking.exception.BookingStartAndEndDatesAreNotEqualsException;
+import ru.practicum.shareit.booking.exception.NoItemsAvailableForBookingException;
+import ru.practicum.shareit.item.exception.ItemNotBelongsToUserException;
+import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.exception.ItemValidateException;
 import ru.practicum.shareit.user.exception.UserEmailAlreadyExistsException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
@@ -30,7 +36,7 @@ public class ErrorHandler {
 
         log.warn("User with same email already exists {}: {}", request.getDescription(false), ex.getMessage());
 
-        return new ErrorResponseDto(ex.getMessage(), "EMAIL_NOT_UNIQUE",Map.of(
+        return new ErrorResponseDto(ex.getMessage(), "EMAIL_NOT_UNIQUE", Map.of(
                 "controller", controllerName,
                 "method", methodName
         ));
@@ -75,6 +81,90 @@ public class ErrorHandler {
         log.warn("Missing request header{}: {}", request.getDescription(false), ex.getMessage());
 
         return new ErrorResponseDto(ex.getMessage(), "USER_NOT_FOUND", Map.of(
+                "controller", controllerName,
+                "method", methodName
+        ));
+    }
+
+    @ExceptionHandler(BookingAccessDeniedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponseDto handleBookingAccessDenied(BookingAccessDeniedException ex, WebRequest request, HandlerMethod handlerMethod) {
+        String controllerName = handlerMethod.getBeanType().getSimpleName();
+        String methodName = handlerMethod.getMethod().getName();
+
+        log.warn("Booking access denied {}: {}", request.getDescription(false), ex.getMessage());
+
+        return new ErrorResponseDto(ex.getMessage(), "BOOKING_ACCESS_DENIED", Map.of(
+                "controller", controllerName,
+                "method", methodName
+        ));
+    }
+
+    @ExceptionHandler(BookingNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponseDto handleBookingNotFound(BookingNotFoundException ex, WebRequest request, HandlerMethod handlerMethod) {
+        String controllerName = handlerMethod.getBeanType().getSimpleName();
+        String methodName = handlerMethod.getMethod().getName();
+
+        log.warn("Booking not found {}: {}", request.getDescription(false), ex.getMessage());
+
+        return new ErrorResponseDto(ex.getMessage(), "BOOKING_NOT_FOUND", Map.of(
+                "controller", controllerName,
+                "method", methodName
+        ));
+    }
+
+    @ExceptionHandler(NoItemsAvailableForBookingException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponseDto handleNoItemsAvailableForBooking(NoItemsAvailableForBookingException ex, WebRequest request, HandlerMethod handlerMethod) {
+        String controllerName = handlerMethod.getBeanType().getSimpleName();
+        String methodName = handlerMethod.getMethod().getName();
+
+        log.warn("No items available for booking {}: {}", request.getDescription(false), ex.getMessage());
+
+        return new ErrorResponseDto(ex.getMessage(), "NO_ITEMS_FOR_BOOKING", Map.of(
+                "controller", controllerName,
+                "method", methodName
+        ));
+    }
+
+    @ExceptionHandler(ItemNotBelongsToUserException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponseDto handleItemNotBelongsToUser(ItemNotBelongsToUserException ex, WebRequest request, HandlerMethod handlerMethod) {
+        String controllerName = handlerMethod.getBeanType().getSimpleName();
+        String methodName = handlerMethod.getMethod().getName();
+
+        log.warn("Item not belongs to user {}: {}", request.getDescription(false), ex.getMessage());
+
+        return new ErrorResponseDto(ex.getMessage(), "ITEM_NOT_BELONGS_TO_USER", Map.of(
+                "controller", controllerName,
+                "method", methodName
+        ));
+    }
+
+    @ExceptionHandler(ItemNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponseDto handleItemNotFound(ItemNotFoundException ex, WebRequest request, HandlerMethod handlerMethod) {
+        String controllerName = handlerMethod.getBeanType().getSimpleName();
+        String methodName = handlerMethod.getMethod().getName();
+
+        log.warn("Item not found {}: {}", request.getDescription(false), ex.getMessage());
+
+        return new ErrorResponseDto(ex.getMessage(), "ITEM_NOT_FOUND", Map.of(
+                "controller", controllerName,
+                "method", methodName
+        ));
+    }
+
+    @ExceptionHandler(BookingStartAndEndDatesAreNotEqualsException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponseDto handleBookingStartAndEndDatesAreNotEquals(BookingStartAndEndDatesAreNotEqualsException ex, WebRequest request, HandlerMethod handlerMethod) {
+        String controllerName = handlerMethod.getBeanType().getSimpleName();
+        String methodName = handlerMethod.getMethod().getName();
+
+        log.warn("Item not found {}: {}", request.getDescription(false), ex.getMessage());
+
+        return new ErrorResponseDto(ex.getMessage(), "BOOKING_START_END_DATES_ARE_EQUALS", Map.of(
                 "controller", controllerName,
                 "method", methodName
         ));

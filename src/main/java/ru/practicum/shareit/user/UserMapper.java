@@ -20,7 +20,7 @@ public interface UserMapper {
     @Mapping(target = "id", source = "id")
     UserDto toDto(User user);
 
-    @Mapping(target = "id", ignore = true) // ID не обновляем
+    @Mapping(target = "id", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUserFromDto(UserDto dto, @MappingTarget User entity);
 }

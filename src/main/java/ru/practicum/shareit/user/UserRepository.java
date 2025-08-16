@@ -1,21 +1,14 @@
 package ru.practicum.shareit.user;
 
-import ru.practicum.shareit.user.exception.UserValidateException;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
-public interface UserRepository {
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
 
-    List<User> findAll();
-
-    Optional<User> getById(Long userId);
-
-    Optional<User> getByEmail(String email);
+    Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
-
-    User save(User user) throws UserValidateException;
-
-    boolean deleteById(Long userId);
 }
