@@ -17,6 +17,7 @@ import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -107,25 +108,37 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getUserBookings(Long userId, BookingState state) {
         log.info("GetUserBookings input: userId={}, state={}", userId, state);
 
-        List<Booking> bookings = bookingRepository.findByBookerIdOrderByStartDesc(userId);
+        List<Booking> bookings;
+        LocalDateTime now = LocalDateTime.now();
+
+        switch (state) {
+            case ALL:
+                bookings = bookingRepository.findByBookerIdOrderByStartDesc(userId);
+                break;
+            case CURRENT:
+                bookings = bookingRepository.findCurrentByBookerId(userId, now);
+                break;
+            case PAST:
+                bookings = bookingRepository.findPastByBookerId(userId, now);
+                break;
+            case FUTURE:
+                bookings = bookingRepository.findFutureByBookerId(userId, now);
+                break;
+            case WAITING:
+                bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING);
+                break;
+            case REJECTED:
+                bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED);
+                break;
+            default:
+                bookings = Collections.emptyList();
+        }
+
+        log.info("GetUserBookings success: size={}", bookings.size());
 
         return bookings.stream()
-                .filter(booking -> filterByState(booking, state))
                 .map(bookingMapper::toDto)
                 .toList();
-    }
-
-    private boolean filterByState(Booking booking, BookingState state) {
-        LocalDateTime now = LocalDateTime.now();
-        return switch (state) {
-            case ALL -> true;
-            case CURRENT -> booking.getStart().isBefore(now) && (booking.getEnd().isAfter(now) ||
-                    booking.getEnd() == null);
-            case PAST -> booking.getEnd().isBefore(now);
-            case FUTURE -> booking.getStart().isAfter(now);
-            case WAITING -> booking.getStatus() == BookingStatus.WAITING;
-            case REJECTED -> booking.getStatus() == BookingStatus.REJECTED;
-        };
     }
 
     public List<BookingDto> getOwnerBookings(Long userId, BookingState state) throws NoItemsAvailableForBookingException, UserNotFoundException {
@@ -137,14 +150,35 @@ public class BookingServiceImpl implements BookingService {
             throw new NoItemsAvailableForBookingException("User id=%d has no items for booking".formatted(userId));
         }
 
-        List<Long> itemIds = itemRepository.findAllByOwnerIdOrderById(userId)
-                .stream()
-                .map(Item::getId)
-                .toList();
+        List<Booking> bookings;
+        LocalDateTime now = LocalDateTime.now();
 
-        return bookingRepository.findByItemIdIn(itemIds)
-                .stream()
-                .filter(booking -> filterByState(booking, state))
+        switch (state) {
+            case ALL:
+                bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(userId);
+                break;
+            case CURRENT:
+                bookings = bookingRepository.findCurrentByItemOwnerId(userId, now);
+                break;
+            case PAST:
+                bookings = bookingRepository.findPastByItemOwnerId(userId, now);
+                break;
+            case FUTURE:
+                bookings = bookingRepository.findFutureByItemOwnerId(userId, now);
+                break;
+            case WAITING:
+                bookings = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING);
+                break;
+            case REJECTED:
+                bookings = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED);
+                break;
+            default:
+                bookings = Collections.emptyList();
+        }
+
+        log.info("GetOwnerBookings success: size={}", bookings.size());
+
+        return bookings.stream()
                 .map(bookingMapper::toDto)
                 .toList();
     }
