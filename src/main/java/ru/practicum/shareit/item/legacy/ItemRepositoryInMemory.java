@@ -1,7 +1,10 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.legacy;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.ItemRepository;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,8 +14,14 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+/**
+ * In-memory implementation.
+ * @deprecated replaced with JPA-implementation {@link ItemRepository}
+ */
+@Deprecated
 @Repository
-public class ItemRepositoryInMemory implements ItemRepository {
+@Profile("legacy")
+public class ItemRepositoryInMemory implements ItemRepositoryDeprecated {
     private final Map<Long, Item> items = new HashMap<>();
     private final AtomicLong idCounter = new AtomicLong(1);
 

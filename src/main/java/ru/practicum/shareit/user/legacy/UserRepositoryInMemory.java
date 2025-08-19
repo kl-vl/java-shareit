@@ -1,6 +1,9 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.legacy;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.exception.UserValidateException;
 
 import java.util.List;
@@ -9,8 +12,14 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * In-memory implementation.
+ * @deprecated replaced with JPA-implementation {@link UserRepository}
+ */
+@Deprecated
 @Repository
-public class UserRepositoryInMemory implements UserRepository {
+@Profile("legacy")
+public class UserRepositoryInMemory implements UserRepositoryDeprecated {
 
     private final Map<Long, User> users = new ConcurrentHashMap<>();
     private final Map<String, User> usersByEmail = new ConcurrentHashMap<>();
@@ -22,7 +31,7 @@ public class UserRepositoryInMemory implements UserRepository {
     }
 
     @Override
-    public Optional<User> getById(Long userId) {
+    public Optional<User> findById(Long userId) {
         return Optional.ofNullable(users.get(userId));
     }
 
